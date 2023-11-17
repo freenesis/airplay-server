@@ -15,6 +15,9 @@ jobs:
           distribution: adopt
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
+        env:
+          GUSERNAME: ${{ secrets.GUSERNAME }}
+          GTOKEN: ${{ secrets.GTOKEN }}
         with:
           gradle-version: 7.4.2
           arguments: build
