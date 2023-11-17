@@ -9,7 +9,7 @@ It's under development.
 
 ## How to use?
 
-* Add java-airplay-server [dependency](https://jitpack.io/#serezhka/java-airplay-server) to your project
+* Add airplay-server [dependency](https://github.com/freenesis/airplay-server/packages/1990861) to your project
 
 * Implement AirplayDataConsumer and start AirPlayServer, for example:
 ```java
