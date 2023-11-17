@@ -1,0 +1,10 @@
+.gradle
+gradlew
+gradlew.bat
+gradle
+.idea
+out
+build
+lombok.config
+dump.h264
+local.properties

@@ -1,0 +1,90 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group 'org.freenesis.airplay'
+version '0.0.1'
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+if (Files.exists(Paths.get("$project.rootDir/local.properties"))) {
+   def localProperties = new Properties()
+   localProperties.load(new FileInputStream("$project.rootDir/local.properties"))
+   localProperties.each { prop -> project.ext.set(prop.key, prop.value) }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "GitHubPackages"
+        /*  Configure path to the library hosted on GitHub Package Registry
+            *  Replace UserID with package owner userID and REPOSITORY with the repository name
+            *  e.g. "https://maven.pkg.github.com/enefce/AndroidLibraryForGitHubPackagesDemo"
+            */
+        url = uri("https://maven.pkg.github.com/freenesis/airplay-lib")
+
+        credentials {
+            username = project.findProperty("github_username") ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("github_token") ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+
+dependencies {
+    implementation 'io.netty:netty-all:4.1.77.Final'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'org.freenesis.airplay:airplay-lib:0.0.1'
+    // implementation files("$project.rootDir\\..\\airplay-lib\\build\\libs\\airplay-lib-0.0.1-all.jar")
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+wrapper {
+    gradleVersion = '7.4.2'
+    distributionType = Wrapper.DistributionType.ALL
+}
+
+task fatJar(type: Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    archiveClassifier.set('all')
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+task jarSources(type: Jar) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives jarSources
+}
+
+publishing {
+   repositories {
+       maven {
+           name = "GitHubPackages"
+           url = uri("https://maven.pkg.github.com/freenesis/${rootProject.name}")
+           credentials {
+               username = project.findProperty("github_username") ?: System.getenv("GITHUB_ACTOR")
+               password = project.findProperty("github_token") ?: System.getenv("GITHUB_TOKEN")
+           }
+       }
+   }
+   publications {
+       gpr(MavenPublication) {
+           from(components["java"])
+           artifact(tasks["fatJar"])
+       }
+   }
+}
